@@ -44,11 +44,16 @@
 </head>
 <body class="bg-gray-100">
 
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="hidden fixed inset-0 bg-white bg-opacity-75 flex justify-center items-center z-50">
+        <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-emerald-500"></div>
+    </div>
+
     <!-- サインイン/登録画面 -->
     <div id="auth-view" class="fixed inset-0 bg-gray-100 flex justify-center items-center z-30 p-4">
         <div class="w-full max-w-sm">
             <div class="bg-white p-8 rounded-2xl shadow-lg text-center">
-                <h1 class="text-2xl font-bold mb-2 text-gray-800">ぼちぼちいこか。</h1>
+                <h1 class="text-2xl font-bold mb-2 text-gray-800">ぼちぼちやろか♪</h1>
                 <p class="mb-6 text-gray-500 text-sm">ニックネームを入力して記録をはじめましょう。</p>
                 
                 <div class="space-y-4">
@@ -171,6 +176,7 @@
         const loginBtn = document.getElementById('login-btn');
         const nicknameInput = document.getElementById('nickname-input');
         const authErrorEl = document.getElementById('auth-error');
+        const loadingOverlay = document.getElementById('loading-overlay');
 
         // Firebase関連の変数
         let app, db, auth;
@@ -214,18 +220,15 @@
 
         function setupAuthListener() {
             onAuthStateChanged(auth, async (user) => {
-                console.log("Auth state changed. User:", user);
+                loadingOverlay.classList.remove('hidden');
                 try {
-                    authView.classList.add('hidden'); 
                     if (user) {
                         userId = user.uid;
-                        console.log("User is logged in with UID:", userId);
                         await loadDataFromFirestore();
-                        console.log("Data loaded from Firestore successfully.");
                         appContainer.classList.remove('hidden');
+                        authView.classList.add('hidden');
                         initialize();
                     } else {
-                        console.log("User is logged out.");
                         userId = null;
                         userInfo = null;
                         records = {};
@@ -238,6 +241,8 @@
                     authErrorEl.textContent = `エラーが発生しました。もう一度お試しください。`;
                     authView.classList.remove('hidden');
                     appContainer.classList.add('hidden');
+                } finally {
+                    loadingOverlay.classList.add('hidden');
                 }
             });
         }
@@ -252,7 +257,7 @@
             }
 
             loginBtn.disabled = true;
-            loginBtn.textContent = '処理中...';
+            loadingOverlay.classList.remove('hidden');
             
             const generatedPassword = nickname + '_secret_STRETCH_APP_!@#';
             const email = `${nickname}@stretch-app.local`;
@@ -267,16 +272,18 @@
                     } catch (createError) {
                         authErrorEl.textContent = 'アカウントの作成に失敗しました。';
                         console.error("Create user failed", createError);
+                        loadingOverlay.classList.add('hidden');
                     }
                 } else if (error.code === 'auth/invalid-email') {
                     authErrorEl.textContent = 'ニックネームに使用できない文字が含まれています。';
+                    loadingOverlay.classList.add('hidden');
                 } else {
                     authErrorEl.textContent = 'ログインに失敗しました。';
                     console.error("Sign in failed", error);
+                    loadingOverlay.classList.add('hidden');
                 }
             } finally {
                  loginBtn.disabled = false;
-                 loginBtn.textContent = 'はじめる / ログイン';
             }
         }
 
@@ -294,7 +301,8 @@
             } else {
                 categories = initialCategories;
                 records = {};
-                userInfo = { createdAt: null, nickname: nicknameInput.value.trim() }; 
+                const nickname = nicknameInput.value.trim() || 'Guest';
+                userInfo = { createdAt: null, nickname: nickname }; 
                 await setDoc(userDocRef, {
                     nickname: userInfo.nickname,
                     categories: initialCategories,
