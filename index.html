@@ -176,6 +176,8 @@
         let app, db, auth;
         let userId = null;
         let userInfo = null;
+        // アプリIDを取得。これがFirestoreのパスに使われます。
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         
         // --- 状態管理 ---
         let currentDate = new Date();
@@ -274,7 +276,8 @@
         // --- データ操作 (Firestore) ---
         async function loadDataFromFirestore() {
             if (!userId) return;
-            const userDocRef = doc(db, "users", userId);
+            // ユーザーごとの設定ドキュメントへの参照を正しいパスで作成
+            const userDocRef = doc(db, `artifacts/${appId}/users`, userId);
             const docSnap = await getDoc(userDocRef);
 
             if (docSnap.exists()) {
@@ -301,7 +304,8 @@
 
         async function saveDataToFirestore() {
             if (!userId) return;
-            const userDocRef = doc(db, "users", userId);
+            // ユーザーごとの設定ドキュメントへの参照を正しいパスで作成
+            const userDocRef = doc(db, `artifacts/${appId}/users`, userId);
             await setDoc(userDocRef, {
                 categories: categories,
                 records: records
