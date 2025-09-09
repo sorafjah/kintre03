@@ -61,7 +61,7 @@
                     はじめる / ログイン
                 </button>
             </div>
-             <p class="text-center text-xs text-gray-400 mt-4">
+             <p class="text-center text-xs text-gray-400 mt-4 whitespace-nowrap">
                 初めての方は、入力したニックネームで新しいアカウントが作成されます。
             </p>
         </div>
@@ -176,7 +176,6 @@
         let app, db, auth;
         let userId = null;
         let userInfo = null;
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         
         // --- 状態管理 ---
         let currentDate = new Date();
@@ -280,7 +279,8 @@
         // --- データ操作 (Firestore) ---
         async function loadDataFromFirestore() {
             if (!userId) return;
-            const userDocRef = doc(db, `artifacts/${appId}/users/${userId}/userData`, 'profile');
+            // ★修正点: データベースのパスをシンプルな構造に変更しました
+            const userDocRef = doc(db, "users", userId);
             const docSnap = await getDoc(userDocRef);
 
             if (docSnap.exists()) {
@@ -307,7 +307,8 @@
 
         async function saveDataToFirestore() {
             if (!userId) return;
-            const userDocRef = doc(db, `artifacts/${appId}/users/${userId}/userData`, 'profile');
+            // ★修正点: データベースのパスをシンプルな構造に変更しました
+            const userDocRef = doc(db, "users", userId);
             await setDoc(userDocRef, {
                 categories: categories,
                 records: records
