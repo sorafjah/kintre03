@@ -48,7 +48,7 @@
     <div id="auth-view" class="fixed inset-0 bg-gray-100 flex justify-center items-center z-30 p-4">
         <div class="w-full max-w-sm">
             <div class="bg-white p-8 rounded-2xl shadow-lg text-center">
-                <h1 class="text-2xl font-bold mb-2 text-gray-800">おかえりなさい！</h1>
+                <h1 class="text-2xl font-bold mb-2 text-gray-800">ぼちぼちいこか。</h1>
                 <p class="mb-6 text-gray-500 text-sm">ニックネームを入力して記録をはじめましょう。</p>
                 
                 <div class="space-y-4">
@@ -214,14 +214,18 @@
 
         function setupAuthListener() {
             onAuthStateChanged(auth, async (user) => {
+                console.log("Auth state changed. User:", user);
                 try {
-                    authView.classList.add('hidden'); // 先にログイン画面を隠す
+                    authView.classList.add('hidden'); 
                     if (user) {
                         userId = user.uid;
+                        console.log("User is logged in with UID:", userId);
                         await loadDataFromFirestore();
+                        console.log("Data loaded from Firestore successfully.");
                         appContainer.classList.remove('hidden');
                         initialize();
                     } else {
+                        console.log("User is logged out.");
                         userId = null;
                         userInfo = null;
                         records = {};
@@ -231,7 +235,7 @@
                     }
                 } catch (error) {
                     console.error("認証処理中にエラー:", error);
-                    authErrorEl.textContent = `エラー: ${error.message}`;
+                    authErrorEl.textContent = `エラーが発生しました。もう一度お試しください。`;
                     authView.classList.remove('hidden');
                     appContainer.classList.add('hidden');
                 }
@@ -279,7 +283,6 @@
         // --- データ操作 (Firestore) ---
         async function loadDataFromFirestore() {
             if (!userId) return;
-            // ★修正点: データベースのパスをシンプルな構造に変更しました
             const userDocRef = doc(db, "users", userId);
             const docSnap = await getDoc(userDocRef);
 
@@ -307,7 +310,6 @@
 
         async function saveDataToFirestore() {
             if (!userId) return;
-            // ★修正点: データベースのパスをシンプルな構造に変更しました
             const userDocRef = doc(db, "users", userId);
             await setDoc(userDocRef, {
                 categories: categories,
