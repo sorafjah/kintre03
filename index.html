@@ -86,8 +86,8 @@
             </header>
 
             <main class="p-4 space-y-6 bg-emerald-50/50 min-h-screen">
-                <!-- ストレッチセクション -->
-                <section id="stretch-section" class="bg-white p-4 rounded-lg shadow-sm">
+                <!-- UI Elements... -->
+                 <section id="stretch-section" class="bg-white p-4 rounded-lg shadow-sm">
                     <div class="flex justify-between items-center mb-3">
                         <h2 class="text-lg font-semibold text-emerald-600 flex items-center">
                             <span class="mr-2 text-xl">🍀</span>ストレッチ
@@ -99,7 +99,6 @@
                     <div id="stretch-items" class="grid grid-cols-3 gap-3"></div>
                 </section>
 
-                <!-- 筋トレセクション -->
                 <section id="strength-section" class="bg-white p-4 rounded-lg shadow-sm">
                     <div class="flex justify-between items-center mb-3">
                         <h2 class="text-lg font-semibold text-orange-500 flex items-center">
@@ -114,9 +113,9 @@
             </main>
         </div>
 
-        <!-- カレンダー表示画面 -->
         <div id="calendar-view" class="hidden">
-            <header class="date-header-sticky p-4 flex justify-between items-center border-b">
+            <!-- Calendar UI Elements... -->
+             <header class="date-header-sticky p-4 flex justify-between items-center border-b">
                 <button id="prev-month" class="p-2 rounded-full hover:bg-gray-200">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
                 </button>
@@ -132,7 +131,7 @@
         </div>
     </div>
 
-    <!-- 項目追加・編集モーダル -->
+    <!-- Modals... -->
     <div id="edit-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-20 p-4">
         <div class="bg-white rounded-lg p-6 w-full max-w-sm">
             <h3 id="modal-title" class="text-lg font-bold mb-4"></h3>
@@ -145,7 +144,6 @@
         </div>
     </div>
     
-    <!-- 削除確認モーダル -->
     <div id="confirm-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-20 p-4">
       <div class="bg-white rounded-lg p-6 w-full max-w-sm shadow-xl">
         <p id="confirm-message" class="mb-4 text-gray-700"></p>
@@ -156,12 +154,13 @@
       </div>
     </div>
 
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
-        // --- DOM要素の取得 ---
+        // --- DOM Elements ---
         const authView = document.getElementById('auth-view');
         const appContainer = document.getElementById('app-container');
         const dailyView = document.getElementById('daily-view');
@@ -178,12 +177,12 @@
         const authErrorEl = document.getElementById('auth-error');
         const loadingOverlay = document.getElementById('loading-overlay');
 
-        // Firebase関連の変数
+        // --- Firebase Variables ---
         let app, db, auth;
         let userId = null;
         let userInfo = null;
         
-        // --- 状態管理 ---
+        // --- App State ---
         let currentDate = new Date();
         let calendarDate = new Date();
         let records = {};
@@ -195,8 +194,9 @@
             strength: ['スクワット', 'ランジ', '腕立てふせ', '片足おじぎ', '腹筋', '背筋']
         };
 
-        // --- Firebase 初期化と認証フロー ---
+        // --- Firebase Initialization ---
         function initializeFirebase() {
+            console.log("1. Firebaseを初期化します...");
             try {
                 const firebaseConfig = {
                   apiKey: "AIzaSyB-rx8uIKoN_wTo3Nd8FdJk6RTNBNvBdjo",
@@ -211,8 +211,10 @@
                 app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
+                console.log("2. Firebaseの初期化が完了しました。認証状態の監視を開始します。");
                 setupAuthListener();
-            } catch (error) {
+            } catch (error)
+            {
                 console.error("Firebaseの初期化に失敗しました:", error);
                 document.body.innerHTML = `<div class="p-4 text-center text-red-600 bg-red-100">アプリケーションの読み込みに失敗しました。</div>`;
             }
@@ -220,15 +222,19 @@
 
         function setupAuthListener() {
             onAuthStateChanged(auth, async (user) => {
+                console.log("3. 認証状態が変化しました。 User:", user ? user.uid : 'null');
                 loadingOverlay.classList.remove('hidden');
                 try {
                     if (user) {
                         userId = user.uid;
+                        console.log("4. ログイン状態です。データをFirestoreから読み込みます。");
                         await loadDataFromFirestore();
+                        console.log("6. データの読み込みが完了しました。アプリ画面を表示します。");
                         appContainer.classList.remove('hidden');
                         authView.classList.add('hidden');
                         initialize();
                     } else {
+                        console.log("4. ログアウト状態です。ログイン画面を表示します。");
                         userId = null;
                         userInfo = null;
                         records = {};
@@ -249,6 +255,7 @@
         
         async function handleLoginOrCreateUser() {
             const nickname = nicknameInput.value.trim();
+            console.log(`A. ログインボタンがクリックされました。ニックネーム: ${nickname}`);
             
             authErrorEl.textContent = '';
             if (!nickname) {
@@ -262,16 +269,22 @@
             const generatedPassword = nickname + '_secret_STRETCH_APP_!@#';
             const email = `${nickname}@stretch-app.local`;
             const password = generatedPassword;
+            console.log(`B. Email (${email}) と Password (hidden) を生成しました。`);
 
             try {
+                console.log("C. ログインを試みます...");
                 await signInWithEmailAndPassword(auth, email, password);
+                console.log("ログインに成功しました。");
             } catch (error) {
+                console.log(`D. ログインに失敗しました。エラーコード: ${error.code}`);
                 if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
                     try {
+                        console.log("E. ユーザーが存在しないため、新規作成を試みます...");
                         await createUserWithEmailAndPassword(auth, email, password);
+                        console.log("ユーザーの新規作成に成功しました。");
                     } catch (createError) {
                         authErrorEl.textContent = 'アカウントの作成に失敗しました。';
-                        console.error("Create user failed", createError);
+                        console.error("F. ユーザーの新規作成に失敗しました:", createError);
                         loadingOverlay.classList.add('hidden');
                     }
                 } else if (error.code === 'auth/invalid-email') {
@@ -279,7 +292,7 @@
                     loadingOverlay.classList.add('hidden');
                 } else {
                     authErrorEl.textContent = 'ログインに失敗しました。';
-                    console.error("Sign in failed", error);
+                    console.error("F. 予期せぬログインエラー:", error);
                     loadingOverlay.classList.add('hidden');
                 }
             } finally {
@@ -287,20 +300,20 @@
             }
         }
 
-        // --- データ操作 (Firestore) ---
         async function loadDataFromFirestore() {
             if (!userId) return;
+            console.log("5. Firestoreからデータを読み込み開始。 User ID:", userId);
             const userDocRef = doc(db, "users", userId);
             const docSnap = await getDoc(userDocRef);
 
             if (docSnap.exists()) {
+                console.log("5a. 既存のデータが見つかりました。");
                 const data = docSnap.data();
                 categories = data.categories || initialCategories;
                 records = data.records || {};
                 userInfo = { createdAt: data.createdAt, nickname: data.nickname };
             } else {
-                categories = initialCategories;
-                records = {};
+                console.log("5a. 新規ユーザーなので、初期データを作成します。");
                 const nickname = nicknameInput.value.trim() || 'Guest';
                 userInfo = { createdAt: null, nickname: nickname }; 
                 await setDoc(userDocRef, {
@@ -309,6 +322,7 @@
                     records: {},
                     createdAt: serverTimestamp()
                 });
+                console.log("5b. 初期データをFirestoreに保存しました。");
                 const newDocSnap = await getDoc(userDocRef);
                 if (newDocSnap.exists()) {
                     userInfo.createdAt = newDocSnap.data().createdAt;
@@ -325,19 +339,18 @@
             }, { merge: true });
         }
 
-        // --- 初期化処理 ---
+        // --- App Initialization ---
         function initialize() {
+            console.log("7. アプリのメイン機能を初期化します。");
             updateDateDisplay();
             renderDailyView();
             setupEventListeners();
         }
 
-        // --- 日付フォーマット ---
         function formatDate(date) {
             return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
         }
 
-        // --- 画面描画 ---
         function updateDateDisplay() {
             const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' };
             currentDateEl.textContent = currentDate.toLocaleDateString('ja-JP', options);
@@ -347,7 +360,6 @@
             updateDateDisplay();
             const dateKey = formatDate(currentDate);
             const dayRecords = records[dateKey] || { stretch: [], strength: [] };
-
             renderCategoryItems('stretch', stretchItemsEl, dayRecords.stretch);
             renderCategoryItems('strength', strengthItemsEl, dayRecords.strength);
         }
@@ -359,11 +371,9 @@
                 btn.textContent = item;
                 btn.dataset.item = item;
                 btn.dataset.category = category;
-
                 const baseClasses = 'item-btn border-2 rounded-lg py-3 text-center transition-all duration-200 w-full text-sm sm:text-base';
                 let inactiveClasses = '';
                 let activeClasses = '';
-
                 if (category === 'stretch') {
                     inactiveClasses = 'bg-emerald-50 border-emerald-200 text-emerald-800 hover:bg-emerald-100';
                     activeClasses = 'bg-emerald-500 border-emerald-500 text-white';
@@ -371,17 +381,14 @@
                     inactiveClasses = 'bg-orange-50 border-orange-200 text-orange-800 hover:bg-orange-100';
                     activeClasses = 'bg-orange-500 border-orange-500 text-white';
                 }
-
                 const isCompleted = completedItems.includes(item);
                 btn.className = `${baseClasses} ${isCompleted ? activeClasses : inactiveClasses}`;
-                
                 btn.addEventListener('click', () => handleItemClick(btn, category, item, inactiveClasses, activeClasses));
                 btn.addEventListener('mousedown', (e) => startLongPress(e, category, item));
                 btn.addEventListener('mouseup', cancelLongPress);
                 btn.addEventListener('mouseleave', cancelLongPress);
                 btn.addEventListener('touchstart', (e) => startLongPress(e, category, item));
                 btn.addEventListener('touchend', cancelLongPress);
-                
                 container.appendChild(btn);
             });
         }
@@ -389,39 +396,32 @@
         function renderCalendar() {
             calendarGridEl.innerHTML = '';
             calendarMonthYearEl.textContent = `${calendarDate.getFullYear()}年 ${calendarDate.getMonth() + 1}月`;
-            
             ['日', '月', '火', '水', '木', '金', '土'].forEach(day => {
                 const dayEl = document.createElement('div');
                 dayEl.className = 'text-center font-bold text-sm text-gray-600';
                 dayEl.textContent = day;
                 calendarGridEl.appendChild(dayEl);
             });
-
             const year = calendarDate.getFullYear();
             const month = calendarDate.getMonth();
             const firstDayOfMonth = new Date(year, month, 1);
             const lastDayOfMonth = new Date(year, month + 1, 0);
             const today = new Date();
             today.setHours(0, 0, 0, 0);
-
             const signedInDate = userInfo && userInfo.createdAt ? new Date(userInfo.createdAt.seconds * 1000) : new Date(0);
             signedInDate.setHours(0, 0, 0, 0);
-            
             for (let i = 0; i < firstDayOfMonth.getDay(); i++) {
                 calendarGridEl.appendChild(document.createElement('div'));
             }
-
             for (let day = 1; day <= lastDayOfMonth.getDate(); day++) {
                 const date = new Date(year, month, day);
                 const dateKey = formatDate(date);
                 const dayEl = document.createElement('div');
                 dayEl.className = 'calendar-day h-12 flex flex-col justify-center items-center cursor-pointer rounded-lg hover:bg-gray-200';
-                
                 const numberEl = document.createElement('span');
                 numberEl.textContent = day;
                 numberEl.className = 'w-6 h-6 flex items-center justify-center';
                 dayEl.appendChild(numberEl);
-                
                 const iconEl = document.createElement('div');
                 iconEl.className = 'text-xs mt-1';
                 const dayRecords = records[dateKey];
@@ -432,7 +432,6 @@
                     if(didStretch) icon += '🍀';
                     if(didStrength) icon += '💪';
                 }
-                
                 if (!icon && date < today && date.toDateString() !== today.toDateString()) {
                     if (date >= signedInDate) {
                         icon = '😨';
@@ -440,34 +439,28 @@
                 }
                 iconEl.textContent = icon;
                 dayEl.appendChild(iconEl);
-
                 if (date.toDateString() === today.toDateString()) {
                     dayEl.classList.add('today');
                 }
                 if (date.toDateString() === currentDate.toDateString()){
                     dayEl.classList.add('selected');
                 }
-
                 dayEl.addEventListener('click', () => {
                     currentDate = date;
                     switchToDailyView();
                 });
-                
                 calendarGridEl.appendChild(dayEl);
             }
         }
 
-        // --- イベントハンドラ ---
+        // --- Event Handlers ---
         let areListenersSetup = false;
         function setupEventListeners() {
             if (areListenersSetup) return;
-
             loginBtn.addEventListener('click', handleLoginOrCreateUser);
-            
             document.getElementById('logout-btn').addEventListener('click', () => {
                 signOut(auth).catch(err => console.error("Sign out failed", err));
             });
-
             document.getElementById('prev-day').addEventListener('click', () => changeDay(-1));
             document.getElementById('next-day').addEventListener('click', () => changeDay(1));
             document.getElementById('current-date').addEventListener('click', switchToCalendarView);
@@ -477,18 +470,12 @@
                 currentDate = new Date();
                 switchToDailyView();
             });
-
             document.querySelectorAll('.add-item-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    openModal('add', btn.dataset.category);
-                });
+                btn.addEventListener('click', () => openModal('add', btn.dataset.category));
             });
-            
             document.getElementById('modal-cancel').addEventListener('click', closeModal);
             document.getElementById('modal-save').addEventListener('click', saveModal);
-            
             document.getElementById('confirm-cancel').addEventListener('click', closeConfirmModal);
-
             areListenersSetup = true;
         }
 
@@ -504,16 +491,11 @@
 
         function handleItemClick(btn, category, item, inactiveClasses, activeClasses) {
             const dateKey = formatDate(currentDate);
-            if (!records[dateKey]) {
-                records[dateKey] = { stretch: [], strength: [] };
-            }
-
+            if (!records[dateKey]) records[dateKey] = { stretch: [], strength: [] };
             const completedList = records[dateKey][category];
             const itemIndex = completedList.indexOf(item);
-
             const inactive = inactiveClasses.split(' ');
             const active = activeClasses.split(' ');
-
             if (itemIndex > -1) {
                 completedList.splice(itemIndex, 1);
                 btn.classList.remove(...active);
@@ -545,18 +527,16 @@
             }
         }
 
-        // --- モーダル操作 ---
+        // --- Modal Logic ---
         function openModal(mode, category, currentItem = '') {
             const titleEl = document.getElementById('modal-title');
             const inputEl = document.getElementById('modal-input');
             const deleteBtn = document.getElementById('modal-delete');
             const saveBtn = document.getElementById('modal-save');
-
             inputEl.value = currentItem;
             saveBtn.dataset.mode = mode;
             saveBtn.dataset.category = category;
             saveBtn.dataset.currentItem = currentItem;
-
             if (mode === 'add') {
                 titleEl.textContent = '項目を追加';
                 deleteBtn.classList.add('hidden');
@@ -586,23 +566,13 @@
           confirmModal.classList.add('hidden');
         }
 
-
         function saveModal() {
             const saveBtn = document.getElementById('modal-save');
             const { mode, category, currentItem } = saveBtn.dataset;
             const newItem = document.getElementById('modal-input').value.trim();
-
-            if (!newItem) {
-                alert('項目名を入力してください。');
-                return;
-            }
-            
+            if (!newItem) { alert('項目名を入力してください。'); return; }
             const isDuplicate = categories[category].includes(newItem) && newItem !== currentItem;
-            if (isDuplicate) {
-                alert('同じ名前の項目が既に存在します。');
-                return;
-            }
-
+            if (isDuplicate) { alert('同じ名前の項目が既に存在します。'); return; }
             if (mode === 'add') {
                 categories[category].push(newItem);
             } else {
@@ -613,9 +583,7 @@
                         const recordCategory = records[dateKey][category];
                         if(recordCategory) {
                             const recordItemIndex = recordCategory.indexOf(currentItem);
-                            if (recordItemIndex > -1) {
-                                recordCategory[recordItemIndex] = newItem;
-                            }
+                            if (recordItemIndex > -1) recordCategory[recordItemIndex] = newItem;
                         }
                     });
                 }
@@ -628,27 +596,21 @@
         function deleteItem(category, item) {
             openConfirmModal(`「${item}」を削除しますか？\nすべての記録からこの項目が削除されます。`, () => {
                 const itemIndex = categories[category].indexOf(item);
-                if (itemIndex > -1) {
-                    categories[category].splice(itemIndex, 1);
-                }
-
+                if (itemIndex > -1) categories[category].splice(itemIndex, 1);
                 Object.keys(records).forEach(dateKey => {
                     const recordCategory = records[dateKey][category];
                     if (recordCategory) {
                         const recordItemIndex = recordCategory.indexOf(item);
-                        if (recordItemIndex > -1) {
-                            recordCategory.splice(recordItemIndex, 1);
-                        }
+                        if (recordItemIndex > -1) recordCategory.splice(recordItemIndex, 1);
                     }
                 });
-                
                 saveDataToFirestore();
                 renderDailyView();
                 closeModal();
             });
         }
 
-        // --- 画面切り替え ---
+        // --- View Switching ---
         function switchToCalendarView() {
             calendarDate = new Date(currentDate);
             renderCalendar();
@@ -662,7 +624,7 @@
             dailyView.classList.remove('hidden');
         }
 
-        // --- アプリケーション開始 ---
+        // --- Start App ---
         initializeFirebase();
 
     </script>
