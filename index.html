@@ -176,7 +176,6 @@
         let app, db, auth;
         let userId = null;
         let userInfo = null;
-        // アプリIDを取得。これがFirestoreのパスに使われます。
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         
         // --- 状態管理 ---
@@ -216,17 +215,24 @@
 
         function setupAuthListener() {
             onAuthStateChanged(auth, async (user) => {
-                authView.classList.add('hidden'); // 先にログイン画面を隠す
-                if (user) {
-                    userId = user.uid;
-                    await loadDataFromFirestore();
-                    appContainer.classList.remove('hidden');
-                    initialize();
-                } else {
-                    userId = null;
-                    userInfo = null;
-                    records = {};
-                    categories = {};
+                try {
+                    authView.classList.add('hidden'); // 先にログイン画面を隠す
+                    if (user) {
+                        userId = user.uid;
+                        await loadDataFromFirestore();
+                        appContainer.classList.remove('hidden');
+                        initialize();
+                    } else {
+                        userId = null;
+                        userInfo = null;
+                        records = {};
+                        categories = {};
+                        authView.classList.remove('hidden');
+                        appContainer.classList.add('hidden');
+                    }
+                } catch (error) {
+                    console.error("認証処理中にエラー:", error);
+                    authErrorEl.textContent = `エラー: ${error.message}`;
                     authView.classList.remove('hidden');
                     appContainer.classList.add('hidden');
                 }
@@ -252,15 +258,13 @@
             try {
                 await signInWithEmailAndPassword(auth, email, password);
             } catch (error) {
-                if (error.code === 'auth/user-not-found') {
+                if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
                     try {
                         await createUserWithEmailAndPassword(auth, email, password);
                     } catch (createError) {
                         authErrorEl.textContent = 'アカウントの作成に失敗しました。';
                         console.error("Create user failed", createError);
                     }
-                } else if (error.code === 'auth/wrong-password') {
-                    authErrorEl.textContent = 'ログイン情報が正しくありません。';
                 } else if (error.code === 'auth/invalid-email') {
                     authErrorEl.textContent = 'ニックネームに使用できない文字が含まれています。';
                 } else {
@@ -276,8 +280,7 @@
         // --- データ操作 (Firestore) ---
         async function loadDataFromFirestore() {
             if (!userId) return;
-            // ユーザーごとの設定ドキュメントへの参照を正しいパスで作成
-            const userDocRef = doc(db, `artifacts/${appId}/users`, userId);
+            const userDocRef = doc(db, `artifacts/${appId}/users/${userId}/userData`, 'profile');
             const docSnap = await getDoc(userDocRef);
 
             if (docSnap.exists()) {
@@ -304,8 +307,7 @@
 
         async function saveDataToFirestore() {
             if (!userId) return;
-            // ユーザーごとの設定ドキュメントへの参照を正しいパスで作成
-            const userDocRef = doc(db, `artifacts/${appId}/users`, userId);
+            const userDocRef = doc(db, `artifacts/${appId}/users/${userId}/userData`, 'profile');
             await setDoc(userDocRef, {
                 categories: categories,
                 records: records
