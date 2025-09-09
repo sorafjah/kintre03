@@ -53,7 +53,7 @@
     <div id="auth-view" class="fixed inset-0 bg-gray-100 flex justify-center items-center z-30 p-4">
         <div class="w-full max-w-sm">
             <div class="bg-white p-8 rounded-2xl shadow-lg text-center">
-                <h1 class="text-2xl font-bold mb-2 text-gray-800">ぼちぼちやろか♪</h1>
+                <h1 class="text-2xl font-bold mb-2 text-gray-800">ぼちぼちやろ〜</h1>
                 <p class="mb-6 text-gray-500 text-sm">ニックネームを入力して記録をはじめましょう。</p>
                 
                 <div class="space-y-4">
@@ -158,7 +158,7 @@
         import { getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
-        // --- DOM要素の取得 ---
+        // --- DOM Elements ---
         const authView = document.getElementById('auth-view');
         const appContainer = document.getElementById('app-container');
         const dailyView = document.getElementById('daily-view');
@@ -175,12 +175,12 @@
         const authErrorEl = document.getElementById('auth-error');
         const loadingOverlay = document.getElementById('loading-overlay');
 
-        // --- Firebase関連の変数 ---
+        // --- Firebase Variables ---
         let app, db, auth;
         let userId = null;
         let userInfo = null;
         
-        // --- アプリの状態管理 ---
+        // --- App State ---
         let currentDate = new Date();
         let calendarDate = new Date();
         let records = {};
@@ -192,7 +192,7 @@
             strength: ['スクワット', 'ランジ', '腕立てふせ', '片足おじぎ', '腹筋', '背筋']
         };
 
-        // --- Firebase 初期化 ---
+        // --- Firebase Initialization ---
         function initializeFirebase() {
             try {
                 const firebaseConfig = {
@@ -215,7 +215,7 @@
             }
         }
 
-        // --- 認証状態の監視 ---
+        // --- Authentication Listener ---
         function setupAuthListener() {
             onAuthStateChanged(auth, async (user) => {
                 loadingOverlay.classList.remove('hidden');
@@ -245,7 +245,7 @@
             });
         }
         
-        // --- ログイン・新規登録処理 ---
+        // --- Login/Create User ---
         async function handleLoginOrCreateUser() {
             const nickname = nicknameInput.value.trim();
             
@@ -285,7 +285,7 @@
             }
         }
 
-        // --- データ操作 (Firestore) ---
+        // --- Data Handling (Firestore) ---
         async function loadDataFromFirestore() {
             if (!userId) return;
             const userDocRef = doc(db, "users", userId);
@@ -297,14 +297,19 @@
                 records = data.records || {};
                 userInfo = { createdAt: data.createdAt, nickname: data.nickname };
             } else {
+                // New user: Set local variables and create document in Firestore
                 const nickname = nicknameInput.value.trim() || 'Guest';
+                categories = initialCategories;
+                records = {};
                 userInfo = { createdAt: null, nickname: nickname }; 
+                
                 await setDoc(userDocRef, {
                     nickname: userInfo.nickname,
                     categories: initialCategories,
                     records: {},
                     createdAt: serverTimestamp()
                 });
+
                 const newDocSnap = await getDoc(userDocRef);
                 if (newDocSnap.exists()) {
                     userInfo.createdAt = newDocSnap.data().createdAt;
@@ -321,19 +326,19 @@
             }, { merge: true });
         }
 
-        // --- アプリUIの初期化 ---
+        // --- App UI Initialization ---
         function initializeAppUI() {
             updateDateDisplay();
             renderDailyView();
             setupAppEventListeners();
         }
 
-        // --- 日付フォーマット ---
+        // --- Date Formatting ---
         function formatDate(date) {
             return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
         }
 
-        // --- 画面描画 ---
+        // --- Rendering ---
         function updateDateDisplay() {
             const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' };
             currentDateEl.textContent = currentDate.toLocaleDateString('ja-JP', options);
@@ -436,7 +441,7 @@
             }
         }
 
-        // --- イベントリスナー設定 ---
+        // --- Event Listeners ---
         let areAppListenersSetup = false;
         function setupAppEventListeners() {
             if (areAppListenersSetup) return;
@@ -510,7 +515,7 @@
             }
         }
 
-        // --- モーダル操作 ---
+        // --- Modal Logic ---
         function openModal(mode, category, currentItem = '') {
             const titleEl = document.getElementById('modal-title');
             const inputEl = document.getElementById('modal-input');
@@ -593,7 +598,7 @@
             });
         }
 
-        // --- 画面切り替え ---
+        // --- View Switching ---
         function switchToCalendarView() {
             calendarDate = new Date(currentDate);
             renderCalendar();
@@ -607,12 +612,12 @@
             dailyView.classList.remove('hidden');
         }
         
-        // --- アプリ起動時の初期設定 ---
+        // --- App Startup ---
         function setupInitialEventListeners() {
             loginBtn.addEventListener('click', handleLoginOrCreateUser);
         }
 
-        // --- アプリ起動 ---
+        // --- Start App ---
         setupInitialEventListeners();
         initializeFirebase();
 
