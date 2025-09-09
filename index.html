@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>ストレッチ＆筋トレ記録</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', 'Helvetica Neue', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .main-container-wrapper {
+            max-width: 480px;
+            margin: 0 auto;
+            background-color: #f9fafb;
+            min-height: 100vh;
+        }
+        .date-header-sticky {
+            position: sticky;
+            top: 0;
+            background-color: #f9fafb;
+            z-index: 10;
+        }
+        .calendar-day.today span {
+            background-color: #10b981;
+            color: white;
+            border-radius: 50%;
+        }
+        .calendar-day.selected {
+            border: 2px solid #10b981;
+            border-radius: 50%;
+        }
+        .long-press-active {
+            transform: scale(0.95);
+        }
+        .item-btn {
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    <!-- サインイン/登録画面 -->
+    <div id="auth-view" class="fixed inset-0 bg-gray-100 flex justify-center items-center z-30 p-4">
+        <div class="w-full max-w-sm">
+            <div class="bg-white p-8 rounded-2xl shadow-lg text-center">
+                <h1 class="text-2xl font-bold mb-2 text-gray-800">おかえりなさい！</h1>
+                <p class="mb-6 text-gray-500 text-sm">ニックネームを入力して記録をはじめましょう。</p>
+                
+                <div class="space-y-4">
+                    <input type="text" id="nickname-input" placeholder="ニックネーム" class="w-full border-gray-300 rounded-lg p-3 text-center focus:ring-emerald-500 focus:border-emerald-500 transition">
+                </div>
+
+                <p id="auth-error" class="text-red-500 text-sm h-5 mt-2 mb-3"></p>
+
+                <button id="login-btn" class="w-full bg-emerald-500 text-white px-8 py-3 rounded-lg font-bold hover:bg-emerald-600 transition-colors shadow-md hover:shadow-lg disabled:bg-gray-400">
+                    はじめる / ログイン
+                </button>
+            </div>
+             <p class="text-center text-xs text-gray-400 mt-4">
+                初めての方は、入力したニックネームで新しいアカウントが作成されます。
+            </p>
+        </div>
+    </div>
+
+    <div id="app-container" class="main-container-wrapper shadow-lg hidden">
+        <!-- メインの記録画面 -->
+        <div id="daily-view">
+            <header class="date-header-sticky p-4 flex justify-between items-center border-b">
+                <button id="prev-day" class="p-2 rounded-full hover:bg-gray-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+                </button>
+                <h1 id="current-date" class="text-xl font-bold cursor-pointer text-gray-800"></h1>
+                <button id="next-day" class="p-2 rounded-full hover:bg-gray-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                </button>
+            </header>
+
+            <main class="p-4 space-y-6 bg-emerald-50/50 min-h-screen">
+                <!-- ストレッチセクション -->
+                <section id="stretch-section" class="bg-white p-4 rounded-lg shadow-sm">
+                    <div class="flex justify-between items-center mb-3">
+                        <h2 class="text-lg font-semibold text-emerald-600 flex items-center">
+                            <span class="mr-2 text-xl">🍀</span>ストレッチ
+                        </h2>
+                        <button class="add-item-btn p-1 rounded-full hover:bg-gray-200" data-category="stretch">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+                        </button>
+                    </div>
+                    <div id="stretch-items" class="grid grid-cols-3 gap-3"></div>
+                </section>
+
+                <!-- 筋トレセクション -->
+                <section id="strength-section" class="bg-white p-4 rounded-lg shadow-sm">
+                    <div class="flex justify-between items-center mb-3">
+                        <h2 class="text-lg font-semibold text-orange-500 flex items-center">
+                            <span class="mr-2 text-xl">💪</span>筋トレ
+                        </h2>
+                        <button class="add-item-btn p-1 rounded-full hover:bg-gray-200" data-category="strength">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+                        </button>
+                    </div>
+                    <div id="strength-items" class="grid grid-cols-3 gap-3"></div>
+                </section>
+            </main>
+        </div>
+
+        <!-- カレンダー表示画面 -->
+        <div id="calendar-view" class="hidden">
+            <header class="date-header-sticky p-4 flex justify-between items-center border-b">
+                <button id="prev-month" class="p-2 rounded-full hover:bg-gray-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+                </button>
+                <h1 id="calendar-month-year" class="text-xl font-bold text-gray-800 cursor-pointer" title="今日の記録に戻る"></h1>
+                <button id="next-month" class="p-2 rounded-full hover:bg-gray-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                </button>
+            </header>
+            <div id="calendar-grid" class="grid grid-cols-7 gap-1 p-2"></div>
+            <div class="absolute bottom-4 right-4">
+                <button id="logout-btn" class="text-xs text-gray-400 hover:text-gray-600 hover:underline">ログアウト</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 項目追加・編集モーダル -->
+    <div id="edit-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-20 p-4">
+        <div class="bg-white rounded-lg p-6 w-full max-w-sm">
+            <h3 id="modal-title" class="text-lg font-bold mb-4"></h3>
+            <input type="text" id="modal-input" class="w-full border rounded p-2 mb-4" placeholder="項目名">
+            <div class="flex justify-end space-x-2">
+                <button id="modal-delete" class="hidden bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">削除</button>
+                <button id="modal-cancel" class="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400">キャンセル</button>
+                <button id="modal-save" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">保存</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 削除確認モーダル -->
+    <div id="confirm-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-20 p-4">
+      <div class="bg-white rounded-lg p-6 w-full max-w-sm shadow-xl">
+        <p id="confirm-message" class="mb-4 text-gray-700"></p>
+        <div class="flex justify-end space-x-2">
+          <button id="confirm-cancel" class="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400">キャンセル</button>
+          <button id="confirm-ok" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">削除</button>
+        </div>
+      </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
+        // --- DOM要素の取得 ---
+        const authView = document.getElementById('auth-view');
+        const appContainer = document.getElementById('app-container');
+        const dailyView = document.getElementById('daily-view');
+        const calendarView = document.getElementById('calendar-view');
+        const currentDateEl = document.getElementById('current-date');
+        const stretchItemsEl = document.getElementById('stretch-items');
+        const strengthItemsEl = document.getElementById('strength-items');
+        const calendarGridEl = document.getElementById('calendar-grid');
+        const calendarMonthYearEl = document.getElementById('calendar-month-year');
+        const modal = document.getElementById('edit-modal');
+        const confirmModal = document.getElementById('confirm-modal');
+        const loginBtn = document.getElementById('login-btn');
+        const nicknameInput = document.getElementById('nickname-input');
+        const authErrorEl = document.getElementById('auth-error');
+
+        // Firebase関連の変数
+        let app, db, auth;
+        let userId = null;
+        let userInfo = null;
+        
+        // --- 状態管理 ---
+        let currentDate = new Date();
+        let calendarDate = new Date();
+        let records = {};
+        let categories = {};
+        let longPressTimer;
+        
+        const initialCategories = {
+            stretch: ['首', '肩', '背中', '腰', '手首', '足首'],
+            strength: ['スクワット', 'ランジ', '腕立てふせ', '片足おじぎ', '腹筋', '背筋']
+        };
+
+        // --- Firebase 初期化と認証フロー ---
+        function initializeFirebase() {
+            try {
+                const firebaseConfig = {
+                  apiKey: "AIzaSyB-rx8uIKoN_wTo3Nd8FdJk6RTNBNvBdjo",
+                  authDomain: "kintre03.firebaseapp.com",
+                  projectId: "kintre03",
+                  storageBucket: "kintre03.firebasestorage.app",
+                  messagingSenderId: "631091226743",
+                  appId: "1:631091226743:web:e287fd545b169f89b27e72",
+                  measurementId: "G-M4C7QNRMT6"
+                };
+
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                setupAuthListener();
+            } catch (error) {
+                console.error("Firebaseの初期化に失敗しました:", error);
+                document.body.innerHTML = `<div class="p-4 text-center text-red-600 bg-red-100">アプリケーションの読み込みに失敗しました。</div>`;
+            }
+        }
+
+        function setupAuthListener() {
+            onAuthStateChanged(auth, async (user) => {
+                authView.classList.add('hidden'); // 先にログイン画面を隠す
+                if (user) {
+                    userId = user.uid;
+                    await loadDataFromFirestore();
+                    appContainer.classList.remove('hidden');
+                    initialize();
+                } else {
+                    userId = null;
+                    userInfo = null;
+                    records = {};
+                    categories = {};
+                    authView.classList.remove('hidden');
+                    appContainer.classList.add('hidden');
+                }
+            });
+        }
+        
+        async function handleLoginOrCreateUser() {
+            const nickname = nicknameInput.value.trim();
+            
+            authErrorEl.textContent = '';
+            if (!nickname) {
+                authErrorEl.textContent = 'ニックネームを入力してください。';
+                return;
+            }
+
+            loginBtn.disabled = true;
+            loginBtn.textContent = '処理中...';
+            
+            const generatedPassword = nickname + '_secret_STRETCH_APP_!@#';
+            const email = `${nickname}@stretch-app.local`;
+            const password = generatedPassword;
+
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+            } catch (error) {
+                if (error.code === 'auth/user-not-found') {
+                    try {
+                        await createUserWithEmailAndPassword(auth, email, password);
+                    } catch (createError) {
+                        authErrorEl.textContent = 'アカウントの作成に失敗しました。';
+                        console.error("Create user failed", createError);
+                    }
+                } else if (error.code === 'auth/wrong-password') {
+                    authErrorEl.textContent = 'ログイン情報が正しくありません。';
+                } else if (error.code === 'auth/invalid-email') {
+                    authErrorEl.textContent = 'ニックネームに使用できない文字が含まれています。';
+                } else {
+                    authErrorEl.textContent = 'ログインに失敗しました。';
+                    console.error("Sign in failed", error);
+                }
+            } finally {
+                 loginBtn.disabled = false;
+                 loginBtn.textContent = 'はじめる / ログイン';
+            }
+        }
+
+        // --- データ操作 (Firestore) ---
+        async function loadDataFromFirestore() {
+            if (!userId) return;
+            const userDocRef = doc(db, "users", userId);
+            const docSnap = await getDoc(userDocRef);
+
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                categories = data.categories || initialCategories;
+                records = data.records || {};
+                userInfo = { createdAt: data.createdAt, nickname: data.nickname };
+            } else {
+                categories = initialCategories;
+                records = {};
+                userInfo = { createdAt: null, nickname: nicknameInput.value.trim() }; 
+                await setDoc(userDocRef, {
+                    nickname: userInfo.nickname,
+                    categories: initialCategories,
+                    records: {},
+                    createdAt: serverTimestamp()
+                });
+                const newDocSnap = await getDoc(userDocRef);
+                if (newDocSnap.exists()) {
+                    userInfo.createdAt = newDocSnap.data().createdAt;
+                }
+            }
+        }
+
+        async function saveDataToFirestore() {
+            if (!userId) return;
+            const userDocRef = doc(db, "users", userId);
+            await setDoc(userDocRef, {
+                categories: categories,
+                records: records
+            }, { merge: true });
+        }
+
+        // --- 初期化処理 ---
+        function initialize() {
+            updateDateDisplay();
+            renderDailyView();
+            setupEventListeners();
+        }
+
+        // --- 日付フォーマット ---
+        function formatDate(date) {
+            return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+        }
+
+        // --- 画面描画 ---
+        function updateDateDisplay() {
+            const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' };
+            currentDateEl.textContent = currentDate.toLocaleDateString('ja-JP', options);
+        }
+
+        function renderDailyView() {
+            updateDateDisplay();
+            const dateKey = formatDate(currentDate);
+            const dayRecords = records[dateKey] || { stretch: [], strength: [] };
+
+            renderCategoryItems('stretch', stretchItemsEl, dayRecords.stretch);
+            renderCategoryItems('strength', strengthItemsEl, dayRecords.strength);
+        }
+        
+        function renderCategoryItems(category, container, completedItems) {
+            container.innerHTML = '';
+            categories[category].forEach(item => {
+                const btn = document.createElement('button');
+                btn.textContent = item;
+                btn.dataset.item = item;
+                btn.dataset.category = category;
+
+                const baseClasses = 'item-btn border-2 rounded-lg py-3 text-center transition-all duration-200 w-full text-sm sm:text-base';
+                let inactiveClasses = '';
+                let activeClasses = '';
+
+                if (category === 'stretch') {
+                    inactiveClasses = 'bg-emerald-50 border-emerald-200 text-emerald-800 hover:bg-emerald-100';
+                    activeClasses = 'bg-emerald-500 border-emerald-500 text-white';
+                } else { // strength
+                    inactiveClasses = 'bg-orange-50 border-orange-200 text-orange-800 hover:bg-orange-100';
+                    activeClasses = 'bg-orange-500 border-orange-500 text-white';
+                }
+
+                const isCompleted = completedItems.includes(item);
+                btn.className = `${baseClasses} ${isCompleted ? activeClasses : inactiveClasses}`;
+                
+                btn.addEventListener('click', () => handleItemClick(btn, category, item, inactiveClasses, activeClasses));
+                btn.addEventListener('mousedown', (e) => startLongPress(e, category, item));
+                btn.addEventListener('mouseup', cancelLongPress);
+                btn.addEventListener('mouseleave', cancelLongPress);
+                btn.addEventListener('touchstart', (e) => startLongPress(e, category, item));
+                btn.addEventListener('touchend', cancelLongPress);
+                
+                container.appendChild(btn);
+            });
+        }
+
+        function renderCalendar() {
+            calendarGridEl.innerHTML = '';
+            calendarMonthYearEl.textContent = `${calendarDate.getFullYear()}年 ${calendarDate.getMonth() + 1}月`;
+            
+            ['日', '月', '火', '水', '木', '金', '土'].forEach(day => {
+                const dayEl = document.createElement('div');
+                dayEl.className = 'text-center font-bold text-sm text-gray-600';
+                dayEl.textContent = day;
+                calendarGridEl.appendChild(dayEl);
+            });
+
+            const year = calendarDate.getFullYear();
+            const month = calendarDate.getMonth();
+            const firstDayOfMonth = new Date(year, month, 1);
+            const lastDayOfMonth = new Date(year, month + 1, 0);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const signedInDate = userInfo && userInfo.createdAt ? new Date(userInfo.createdAt.seconds * 1000) : new Date(0);
+            signedInDate.setHours(0, 0, 0, 0);
+            
+            for (let i = 0; i < firstDayOfMonth.getDay(); i++) {
+                calendarGridEl.appendChild(document.createElement('div'));
+            }
+
+            for (let day = 1; day <= lastDayOfMonth.getDate(); day++) {
+                const date = new Date(year, month, day);
+                const dateKey = formatDate(date);
+                const dayEl = document.createElement('div');
+                dayEl.className = 'calendar-day h-12 flex flex-col justify-center items-center cursor-pointer rounded-lg hover:bg-gray-200';
+                
+                const numberEl = document.createElement('span');
+                numberEl.textContent = day;
+                numberEl.className = 'w-6 h-6 flex items-center justify-center';
+                dayEl.appendChild(numberEl);
+                
+                const iconEl = document.createElement('div');
+                iconEl.className = 'text-xs mt-1';
+                const dayRecords = records[dateKey];
+                let icon = '';
+                if (dayRecords) {
+                    const didStretch = dayRecords.stretch && dayRecords.stretch.length > 0;
+                    const didStrength = dayRecords.strength && dayRecords.strength.length > 0;
+                    if(didStretch) icon += '🍀';
+                    if(didStrength) icon += '💪';
+                }
+                
+                if (!icon && date < today && date.toDateString() !== today.toDateString()) {
+                    if (date >= signedInDate) {
+                        icon = '😨';
+                    }
+                }
+                iconEl.textContent = icon;
+                dayEl.appendChild(iconEl);
+
+                if (date.toDateString() === today.toDateString()) {
+                    dayEl.classList.add('today');
+                }
+                if (date.toDateString() === currentDate.toDateString()){
+                    dayEl.classList.add('selected');
+                }
+
+                dayEl.addEventListener('click', () => {
+                    currentDate = date;
+                    switchToDailyView();
+                });
+                
+                calendarGridEl.appendChild(dayEl);
+            }
+        }
+
+        // --- イベントハンドラ ---
+        let areListenersSetup = false;
+        function setupEventListeners() {
+            if (areListenersSetup) return;
+
+            loginBtn.addEventListener('click', handleLoginOrCreateUser);
+            
+            document.getElementById('logout-btn').addEventListener('click', () => {
+                signOut(auth).catch(err => console.error("Sign out failed", err));
+            });
+
+            document.getElementById('prev-day').addEventListener('click', () => changeDay(-1));
+            document.getElementById('next-day').addEventListener('click', () => changeDay(1));
+            document.getElementById('current-date').addEventListener('click', switchToCalendarView);
+            document.getElementById('prev-month').addEventListener('click', () => changeMonth(-1));
+            document.getElementById('next-month').addEventListener('click', () => changeMonth(1));
+            document.getElementById('calendar-month-year').addEventListener('click', () => {
+                currentDate = new Date();
+                switchToDailyView();
+            });
+
+            document.querySelectorAll('.add-item-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    openModal('add', btn.dataset.category);
+                });
+            });
+            
+            document.getElementById('modal-cancel').addEventListener('click', closeModal);
+            document.getElementById('modal-save').addEventListener('click', saveModal);
+            
+            document.getElementById('confirm-cancel').addEventListener('click', closeConfirmModal);
+
+            areListenersSetup = true;
+        }
+
+        function changeDay(offset) {
+            currentDate.setDate(currentDate.getDate() + offset);
+            renderDailyView();
+        }
+
+        function changeMonth(offset) {
+            calendarDate.setMonth(calendarDate.getMonth() + offset);
+            renderCalendar();
+        }
+
+        function handleItemClick(btn, category, item, inactiveClasses, activeClasses) {
+            const dateKey = formatDate(currentDate);
+            if (!records[dateKey]) {
+                records[dateKey] = { stretch: [], strength: [] };
+            }
+
+            const completedList = records[dateKey][category];
+            const itemIndex = completedList.indexOf(item);
+
+            const inactive = inactiveClasses.split(' ');
+            const active = activeClasses.split(' ');
+
+            if (itemIndex > -1) {
+                completedList.splice(itemIndex, 1);
+                btn.classList.remove(...active);
+                btn.classList.add(...inactive);
+            } else {
+                completedList.push(item);
+                btn.classList.remove(...inactive);
+                btn.classList.add(...active);
+            }
+            saveDataToFirestore();
+        }
+
+        function startLongPress(e, category, item) {
+            const target = e.currentTarget;
+            target.classList.add('long-press-active');
+            longPressTimer = setTimeout(() => {
+                if (navigator.vibrate) navigator.vibrate(50);
+                openModal('edit', category, item);
+                target.classList.remove('long-press-active');
+                longPressTimer = null;
+            }, 500);
+        }
+
+        function cancelLongPress(e) {
+            e.currentTarget.classList.remove('long-press-active');
+            if (longPressTimer) {
+                clearTimeout(longPressTimer);
+                longPressTimer = null;
+            }
+        }
+
+        // --- モーダル操作 ---
+        function openModal(mode, category, currentItem = '') {
+            const titleEl = document.getElementById('modal-title');
+            const inputEl = document.getElementById('modal-input');
+            const deleteBtn = document.getElementById('modal-delete');
+            const saveBtn = document.getElementById('modal-save');
+
+            inputEl.value = currentItem;
+            saveBtn.dataset.mode = mode;
+            saveBtn.dataset.category = category;
+            saveBtn.dataset.currentItem = currentItem;
+
+            if (mode === 'add') {
+                titleEl.textContent = '項目を追加';
+                deleteBtn.classList.add('hidden');
+            } else {
+                titleEl.textContent = '項目を編集';
+                deleteBtn.classList.remove('hidden');
+                deleteBtn.onclick = () => deleteItem(category, currentItem);
+            }
+            modal.classList.remove('hidden');
+            inputEl.focus();
+        }
+
+        function closeModal() {
+            modal.classList.add('hidden');
+        }
+        
+        function openConfirmModal(message, onConfirm) {
+          document.getElementById('confirm-message').textContent = message;
+          document.getElementById('confirm-ok').onclick = () => {
+            onConfirm();
+            closeConfirmModal();
+          };
+          confirmModal.classList.remove('hidden');
+        }
+
+        function closeConfirmModal() {
+          confirmModal.classList.add('hidden');
+        }
+
+
+        function saveModal() {
+            const saveBtn = document.getElementById('modal-save');
+            const { mode, category, currentItem } = saveBtn.dataset;
+            const newItem = document.getElementById('modal-input').value.trim();
+
+            if (!newItem) {
+                alert('項目名を入力してください。');
+                return;
+            }
+            
+            const isDuplicate = categories[category].includes(newItem) && newItem !== currentItem;
+            if (isDuplicate) {
+                alert('同じ名前の項目が既に存在します。');
+                return;
+            }
+
+            if (mode === 'add') {
+                categories[category].push(newItem);
+            } else {
+                const itemIndex = categories[category].indexOf(currentItem);
+                if (itemIndex > -1) {
+                    categories[category][itemIndex] = newItem;
+                    Object.keys(records).forEach(dateKey => {
+                        const recordCategory = records[dateKey][category];
+                        if(recordCategory) {
+                            const recordItemIndex = recordCategory.indexOf(currentItem);
+                            if (recordItemIndex > -1) {
+                                recordCategory[recordItemIndex] = newItem;
+                            }
+                        }
+                    });
+                }
+            }
+            saveDataToFirestore();
+            renderDailyView();
+            closeModal();
+        }
+
+        function deleteItem(category, item) {
+            openConfirmModal(`「${item}」を削除しますか？\nすべての記録からこの項目が削除されます。`, () => {
+                const itemIndex = categories[category].indexOf(item);
+                if (itemIndex > -1) {
+                    categories[category].splice(itemIndex, 1);
+                }
+
+                Object.keys(records).forEach(dateKey => {
+                    const recordCategory = records[dateKey][category];
+                    if (recordCategory) {
+                        const recordItemIndex = recordCategory.indexOf(item);
+                        if (recordItemIndex > -1) {
+                            recordCategory.splice(recordItemIndex, 1);
+                        }
+                    }
+                });
+                
+                saveDataToFirestore();
+                renderDailyView();
+                closeModal();
+            });
+        }
+
+        // --- 画面切り替え ---
+        function switchToCalendarView() {
+            calendarDate = new Date(currentDate);
+            renderCalendar();
+            dailyView.classList.add('hidden');
+            calendarView.classList.remove('hidden');
+        }
+
+        function switchToDailyView() {
+            renderDailyView();
+            calendarView.classList.add('hidden');
+            dailyView.classList.remove('hidden');
+        }
+
+        // --- アプリケーション開始 ---
+        initializeFirebase();
+
+    </script>
+</body>
+</html>
+
