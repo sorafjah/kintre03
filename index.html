@@ -4,6 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>ストレッチ＆筋トレ記録</title>
+    
+    <!-- iPhone Icon -->
+    <link rel="apple-touch-icon" href="stretch.png">
+    
+    <!-- Web App Mode -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="ストレッチ＆筋トレ記録">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -44,12 +53,10 @@
 </head>
 <body class="bg-gray-100">
 
-    <!-- Loading Overlay -->
     <div id="loading-overlay" class="hidden fixed inset-0 bg-white bg-opacity-75 flex justify-center items-center z-50">
         <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-emerald-500"></div>
     </div>
 
-    <!-- サインイン/登録画面 -->
     <div id="auth-view" class="fixed inset-0 bg-gray-100 flex justify-center items-center z-30 p-4">
         <div class="w-full max-w-sm">
             <div class="bg-white p-8 rounded-2xl shadow-lg text-center">
@@ -67,13 +74,12 @@
                 </button>
             </div>
              <p class="text-center text-xs text-gray-400 mt-4">
-                初めての方は、入力したニックネームで新しいアカウントが作成されます。
-            </p>
+                  初めての方は、入力したニックネームで新しいアカウントが作成されます。
+             </p>
         </div>
     </div>
 
     <div id="app-container" class="main-container-wrapper shadow-lg hidden">
-        <!-- メインの記録画面 -->
         <div id="daily-view">
             <header class="date-header-sticky p-4 flex justify-between items-center border-b">
                 <button id="prev-day" class="p-2 rounded-full hover:bg-gray-200">
@@ -87,49 +93,48 @@
 
             <main class="p-4 space-y-6 bg-emerald-50/50 min-h-screen">
                  <section id="stretch-section" class="bg-white p-4 rounded-lg shadow-sm">
-                    <div class="flex justify-between items-center mb-3">
-                        <h2 class="text-lg font-semibold text-emerald-600 flex items-center">
-                            <span class="mr-2 text-xl">🍀</span>ストレッチ
-                        </h2>
-                        <button class="add-item-btn p-1 rounded-full hover:bg-gray-200" data-category="stretch">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
-                        </button>
-                    </div>
-                    <div id="stretch-items" class="grid grid-cols-3 gap-3"></div>
-                </section>
+                      <div class="flex justify-between items-center mb-3">
+                           <h2 class="text-lg font-semibold text-emerald-600 flex items-center">
+                               <span class="mr-2 text-xl">🍀</span>ストレッチ
+                           </h2>
+                           <button class="add-item-btn p-1 rounded-full hover:bg-gray-200" data-category="stretch">
+                               <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+                           </button>
+                      </div>
+                      <div id="stretch-items" class="grid grid-cols-3 gap-3"></div>
+                 </section>
 
-                <section id="strength-section" class="bg-white p-4 rounded-lg shadow-sm">
-                    <div class="flex justify-between items-center mb-3">
-                        <h2 class="text-lg font-semibold text-orange-500 flex items-center">
-                            <span class="mr-2 text-xl">💪</span>筋トレ
-                        </h2>
-                        <button class="add-item-btn p-1 rounded-full hover:bg-gray-200" data-category="strength">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
-                        </button>
-                    </div>
-                    <div id="strength-items" class="grid grid-cols-3 gap-3"></div>
-                </section>
+                 <section id="strength-section" class="bg-white p-4 rounded-lg shadow-sm">
+                      <div class="flex justify-between items-center mb-3">
+                           <h2 class="text-lg font-semibold text-orange-500 flex items-center">
+                               <span class="mr-2 text-xl">💪</span>筋トレ
+                           </h2>
+                           <button class="add-item-btn p-1 rounded-full hover:bg-gray-200" data-category="strength">
+                               <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+                           </button>
+                      </div>
+                      <div id="strength-items" class="grid grid-cols-3 gap-3"></div>
+                 </section>
             </main>
         </div>
 
         <div id="calendar-view" class="hidden">
              <header class="date-header-sticky p-4 flex justify-between items-center border-b">
-                <button id="prev-month" class="p-2 rounded-full hover:bg-gray-200">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
-                </button>
-                <h1 id="calendar-month-year" class="text-xl font-bold text-gray-800 cursor-pointer" title="今日の記録に戻る"></h1>
-                <button id="next-month" class="p-2 rounded-full hover:bg-gray-200">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
-                </button>
-            </header>
-            <div id="calendar-grid" class="grid grid-cols-7 gap-1 p-2"></div>
-            <div class="absolute bottom-4 right-4">
-                <button id="logout-btn" class="text-xs text-gray-400 hover:text-gray-600 hover:underline">ログアウト</button>
-            </div>
+                 <button id="prev-month" class="p-2 rounded-full hover:bg-gray-200">
+                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+                 </button>
+                 <h1 id="calendar-month-year" class="text-xl font-bold text-gray-800 cursor-pointer" title="今日の記録に戻る"></h1>
+                 <button id="next-month" class="p-2 rounded-full hover:bg-gray-200">
+                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                 </button>
+             </header>
+             <div id="calendar-grid" class="grid grid-cols-7 gap-1 p-2"></div>
+             <div class="absolute bottom-4 right-4">
+                 <button id="logout-btn" class="text-xs text-gray-400 hover:text-gray-600 hover:underline">ログアウト</button>
+             </div>
         </div>
     </div>
 
-    <!-- Modals -->
     <div id="edit-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-20 p-4">
         <div class="bg-white rounded-lg p-6 w-full max-w-sm">
             <h3 id="modal-title" class="text-lg font-bold mb-4"></h3>
@@ -154,9 +159,10 @@
 
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        // Firebase SDKの最新バージョンをインポート
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
         
         // --- DOM Elements ---
         const authView = document.getElementById('auth-view');
@@ -195,14 +201,15 @@
         // --- Firebase Initialization ---
         function initializeFirebase() {
             try {
+                // Your web app's Firebase configuration
                 const firebaseConfig = {
-                  apiKey: "AIzaSyB-rx8uIKoN_wTo3Nd8FdJk6RTNBNvBdjo",
-                  authDomain: "kintre03.firebaseapp.com",
-                  projectId: "kintre03",
-                  storageBucket: "kintre03.firebasestorage.app",
-                  messagingSenderId: "631091226743",
-                  appId: "1:631091226743:web:e287fd545b169f89b27e72",
-                  measurementId: "G-M4C7QNRMT6"
+                  apiKey: "AIzaSyBrpLuGQ8-Xg31jvaCt4Wjx2HzS8U9YyGs",
+                  authDomain: "kintre04.firebaseapp.com",
+                  projectId: "kintre04",
+                  storageBucket: "kintre04.firebasestorage.app",
+                  messagingSenderId: "542825885013",
+                  appId: "1:542825885013:web:b0fd2c4f616050a93f13dc",
+                  measurementId: "G-FRBZ5KF7C7"
                 };
 
                 app = initializeApp(firebaseConfig);
@@ -211,7 +218,7 @@
                 setupAuthListener();
             } catch (error) {
                 console.error("Firebase Initialization Failed:", error);
-                document.body.innerHTML = `<div class="p-4 text-center text-red-600 bg-red-100">アプリケーションの読み込みに失敗しました。</div>`;
+                document.body.innerHTML = `<div class="p-4 text-center text-red-600 bg-red-100">アプリケーションの読み込みに失敗しました。Firebaseの設定情報を確認してください。</div>`;
             }
         }
 
@@ -258,12 +265,15 @@
             loginBtn.disabled = true;
             loadingOverlay.classList.remove('hidden');
             
+            // ニックネームからメールアドレスとパスワードを生成
             const generatedPassword = nickname + '_secret_STRETCH_APP_!@#';
             const email = `${nickname}@stretch-app.local`;
 
             try {
+                // まずログインを試みる
                 await signInWithEmailAndPassword(auth, email, generatedPassword);
             } catch (error) {
+                // ユーザーが存在しない場合、新規作成する
                 if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
                     try {
                         await createUserWithEmailAndPassword(auth, email, generatedPassword);
@@ -297,7 +307,7 @@
                 records = data.records || {};
                 userInfo = { createdAt: data.createdAt, nickname: data.nickname };
             } else {
-                // New user: Set local variables and create document in Firestore
+                // 新規ユーザーの場合、初期データを作成
                 const nickname = nicknameInput.value.trim() || 'Guest';
                 categories = initialCategories;
                 records = {};
@@ -624,5 +634,3 @@
     </script>
 </body>
 </html>
-
-
