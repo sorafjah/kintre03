@@ -5,7 +5,7 @@ const CACHE_NAME = 'stretch-kintore-cache-v1';
 
 // インストール時にキャッシュするアセットのリスト
 const urlsToCache = [
-  '/', // アプリのメインページ (index.html)
+  '/kintre03/', // 変更点: '/' から '/kintre03/' に変更
   'manifest.json', // Web App Manifest
   'stretch.png', // アプリアイコン
   'https://cdn.tailwindcss.com', // Tailwind CSS
