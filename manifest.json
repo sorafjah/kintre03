@@ -1,0 +1,22 @@
+{
+  "name": "ストレッチ＆筋トレ記録",
+  "short_name": "ストレッチ記録",
+  "description": "日々のストレッチと筋トレを記録するアプリです。",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f9fafb",
+  "theme_color": "#10b981",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "stretch.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "stretch.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
