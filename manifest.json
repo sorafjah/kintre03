@@ -2,7 +2,7 @@
   "name": "ストレッチ＆筋トレ記録",
   "short_name": "ストレッチ記録",
   "description": "日々のストレッチと筋トレを記録するアプリです。",
-  "start_url": "/",
+  "start_url": "/kintre03/",
   "display": "standalone",
   "background_color": "#f9fafb",
   "theme_color": "#10b981",
